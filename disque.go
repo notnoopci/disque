@@ -241,6 +241,17 @@ func (pool *Pool) Nack(job *Job) error {
 	return nil
 }
 
+// Working Claims to be still working with the specified job, and asks Disque to postpone the next time it will deliver the job again
+func (pool *Pool) Working(job *Job) error {
+	sess := pool.redis.Get()
+	defer sess.Close()
+
+	if _, err := sess.Do("WORKING", job.ID); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Wait blocks until the given job is ACKed.
 // Native WAITJOB discussed upstream at https://github.com/antirez/disque/issues/168.
 func (pool *Pool) Wait(job *Job) error {
